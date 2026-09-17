@@ -1,29 +1,143 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>IPAM Document Intelligence</title>
-  <link rel="stylesheet" href="/static/style.css">
+    <meta charset="utf-8">
+    <title>IPAM Document Intelligence</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
-  <main>
+
+<main>
+
     <h1>IPAM Explainable AI Document Intelligence</h1>
-    <p>Upload a PDF, DOCX, or scanned image to test the document-processing pipeline.</p>
+
+    <p>
+        Document Classification, Retrieval and Decision Support Dashboard
+    </p>
+
+    <hr>
+
+    <h2>Upload Document</h2>
+
     <form id="uploadForm">
-      <input id="file" type="file" accept=".pdf,.docx,.png,.jpg,.jpeg,.tiff,.bmp" required>
-      <button>Process Document</button>
+        <input
+            id="file"
+            type="file"
+            accept=".pdf,.docx,.png,.jpg,.jpeg,.tiff,.bmp"
+            required
+        >
+
+        <button type="submit">
+            Process Document
+        </button>
     </form>
+
     <pre id="result"></pre>
-  </main>
+
+    <hr>
+
+    <h2>Document Records</h2>
+
+    <button onclick="loadDocuments()">
+        Refresh Documents
+    </button>
+
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Filename</th>
+                <th>Category</th>
+                <th>Confidence</th>
+                <th>Uploaded At</th>
+            </tr>
+        </thead>
+
+        <tbody id="documentsTable">
+            <tr>
+                <td colspan="5">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
+
+</main>
+
 <script>
-const form=document.getElementById('uploadForm');
-form.addEventListener('submit', async e=>{
-  e.preventDefault();
-  const fd=new FormData();
-  fd.append('file',document.getElementById('file').files[0]);
-  const r=await fetch('/api/documents',{method:'POST',body:fd});
-  document.getElementById('result').textContent=JSON.stringify(await r.json(),null,2);
+
+const form = document.getElementById("uploadForm");
+
+form.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    const fileInput = document.getElementById("file");
+
+    if (!fileInput.files.length) {
+        alert("Please select a document.");
+        return;
+    }
+
+    const fd = new FormData();
+
+    fd.append("file", fileInput.files[0]);
+
+    const response = await fetch("/api/documents", {
+        method: "POST",
+        body: fd
+    });
+
+    const data = await response.json();
+
+    document.getElementById("result").textContent =
+        JSON.stringify(data, null, 2);
+
+    loadDocuments();
 });
+
+
+async function loadDocuments() {
+
+    const response = await fetch("/api/documents");
+
+    const documents = await response.json();
+
+    const table = document.getElementById("documentsTable");
+
+    table.innerHTML = "";
+
+    if (documents.length === 0) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="5">No documents found.</td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    documents.forEach(document => {
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${document.id}</td>
+            <td>${document.filename}</td>
+            <td>${document.category}</td>
+            <td>${document.confidence}</td>
+            <td>${document.uploaded_at}</td>
+        `;
+
+        table.appendChild(row);
+
+    });
+}
+
+
+loadDocuments();
+
 </script>
+
 </body>
 </html>
