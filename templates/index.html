@@ -117,21 +117,21 @@ async function loadDocuments() {
         return;
     }
 
-    documents.forEach(document => {
+    documents.forEach(item => {
 
-        const row = document.createElement("tr");
+    const row = document.createElement("tr");
 
-        row.innerHTML = `
-            <td>${document.id}</td>
-            <td>${document.filename}</td>
-            <td>${document.category}</td>
-            <td>${document.confidence}</td>
-            <td>${document.uploaded_at}</td>
-        `;
+    row.innerHTML = `
+        <td>${item.id}</td>
+        <td>${item.filename}</td>
+        <td>${item.category}</td>
+        <td>${item.confidence}</td>
+        <td>${item.uploaded_at}</td>
+    `;
 
-        table.appendChild(row);
+    table.appendChild(row);
 
-    });
+});
 }
 
 
