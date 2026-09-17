@@ -63,3 +63,32 @@ async def upload_document(file: UploadFile = File(...)):
         "text_preview": text[:1000],
         "document_id": document.id
     })
+@app.get("/api/documents")
+def get_documents():
+    db = SessionLocal()
+
+    try:
+        documents = (
+            db.query(Document)
+            .order_by(Document.id.desc())
+            .all()
+        )
+
+        return [
+            {
+                "id": document.id,
+                "filename": document.filename,
+                "category": document.category,
+                "confidence": document.confidence,
+                "explanation": document.explanation,
+                "uploaded_at": (
+                    document.uploaded_at.isoformat()
+                    if document.uploaded_at
+                    else None
+                )
+            }
+            for document in documents
+        ]
+
+    finally:
+        db.close()
