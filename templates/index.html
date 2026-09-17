@@ -1,5 +1,6 @@
 <!doctype html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>IPAM Document Intelligence</title>
@@ -16,11 +17,43 @@
         Document Classification, Retrieval and Decision Support Dashboard
     </p>
 
+    <!-- Dashboard Statistics -->
+    <section class="stats">
+
+        <div class="stat-card">
+            <h3>Total Documents</h3>
+            <p id="totalDocuments">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Transcripts</h3>
+            <p id="transcriptCount">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Admissions</h3>
+            <p id="admissionCount">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Financial Records</h3>
+            <p id="financialCount">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Administrative Memos</h3>
+            <p id="memoCount">0</p>
+        </div>
+
+    </section>
+
     <hr>
 
+    <!-- Upload Section -->
     <h2>Upload Document</h2>
 
     <form id="uploadForm">
+
         <input
             id="file"
             type="file"
@@ -31,19 +64,22 @@
         <button type="submit">
             Process Document
         </button>
+
     </form>
 
     <pre id="result"></pre>
 
     <hr>
 
+    <!-- Document Records -->
     <h2>Document Records</h2>
 
     <button onclick="loadDocuments()">
         Refresh Documents
     </button>
 
-    <table border="1" cellpadding="8" cellspacing="0">
+    <table>
+
         <thead>
             <tr>
                 <th>ID</th>
@@ -55,17 +91,26 @@
         </thead>
 
         <tbody id="documentsTable">
+
             <tr>
-                <td colspan="5">Loading...</td>
+                <td colspan="5">
+                    Loading...
+                </td>
             </tr>
+
         </tbody>
+
     </table>
 
 </main>
 
+
 <script>
 
 const form = document.getElementById("uploadForm");
+
+
+/* Upload and process document */
 
 form.addEventListener("submit", async function(e) {
 
@@ -74,7 +119,9 @@ form.addEventListener("submit", async function(e) {
     const fileInput = document.getElementById("file");
 
     if (!fileInput.files.length) {
+
         alert("Please select a document.");
+
         return;
     }
 
@@ -82,19 +129,31 @@ form.addEventListener("submit", async function(e) {
 
     fd.append("file", fileInput.files[0]);
 
+
     const response = await fetch("/api/documents", {
+
         method: "POST",
+
         body: fd
+
     });
 
+
     const data = await response.json();
+
 
     document.getElementById("result").textContent =
         JSON.stringify(data, null, 2);
 
+
+    /* Refresh dashboard after upload */
+
     loadDocuments();
+
 });
 
+
+/* Load documents from PostgreSQL through API */
 
 async function loadDocuments() {
 
@@ -102,42 +161,99 @@ async function loadDocuments() {
 
     const documents = await response.json();
 
+
+    /* Update statistics */
+
+    document.getElementById("totalDocuments").textContent =
+        documents.length;
+
+
+    const transcriptCount =
+        documents.filter(item =>
+            item.category === "Transcript"
+        ).length;
+
+
+    const admissionCount =
+        documents.filter(item =>
+            item.category === "Admission"
+        ).length;
+
+
+    const financialCount =
+        documents.filter(item =>
+            item.category === "Financial Record"
+        ).length;
+
+
+    const memoCount =
+        documents.filter(item =>
+            item.category === "Administrative Memo"
+        ).length;
+
+
+    document.getElementById("transcriptCount").textContent =
+        transcriptCount;
+
+
+    document.getElementById("admissionCount").textContent =
+        admissionCount;
+
+
+    document.getElementById("financialCount").textContent =
+        financialCount;
+
+
+    document.getElementById("memoCount").textContent =
+        memoCount;
+
+
+    /* Update document table */
+
     const table = document.getElementById("documentsTable");
 
     table.innerHTML = "";
+
 
     if (documents.length === 0) {
 
         table.innerHTML = `
             <tr>
-                <td colspan="5">No documents found.</td>
+                <td colspan="5">
+                    No documents found.
+                </td>
             </tr>
         `;
 
         return;
     }
 
+
     documents.forEach(item => {
 
-    const row = document.createElement("tr");
+        const row = document.createElement("tr");
 
-    row.innerHTML = `
-        <td>${item.id}</td>
-        <td>${item.filename}</td>
-        <td>${item.category}</td>
-        <td>${item.confidence}</td>
-        <td>${item.uploaded_at}</td>
-    `;
+        row.innerHTML = `
+            <td>${item.id}</td>
+            <td>${item.filename}</td>
+            <td>${item.category}</td>
+            <td>${item.confidence}</td>
+            <td>${item.uploaded_at}</td>
+        `;
 
-    table.appendChild(row);
+        table.appendChild(row);
 
-});
+    });
+
 }
 
+
+/* Load dashboard when page opens */
 
 loadDocuments();
 
 </script>
 
 </body>
+
 </html>
