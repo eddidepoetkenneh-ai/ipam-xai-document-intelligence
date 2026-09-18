@@ -8,6 +8,7 @@ import json
 from .services.ingestion import extract_text
 from .services.classifier import classify_document
 from .services.explain import explain_classification
+from .services.semantic_retrieval import semantic_search
 from .database import SessionLocal
 from .models import Document
 
@@ -63,6 +64,8 @@ async def upload_document(file: UploadFile = File(...)):
         "text_preview": text[:1000],
         "document_id": document.id
     })
+
+
 @app.get("/api/documents")
 def get_documents():
     db = SessionLocal()
@@ -89,6 +92,28 @@ def get_documents():
             }
             for document in documents
         ]
+
+    finally:
+        db.close()
+
+
+@app.get("/api/search")
+def search_documents(q: str, top_k: int = 5):
+    db = SessionLocal()
+
+    try:
+        documents = db.query(Document).all()
+
+        results = semantic_search(
+            query=q,
+            documents=documents,
+            top_k=top_k
+        )
+
+        return {
+            "query": q,
+            "results": results
+        }
 
     finally:
         db.close()

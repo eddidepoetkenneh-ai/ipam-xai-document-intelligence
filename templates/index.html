@@ -235,121 +235,225 @@
 
     <section>
 
-        <h2>Document Retrieval</h2>
+    <h2>Semantic Document Search</h2>
 
-        <p class="section-description">
-            Search and filter documents stored in the IPAM
-            document intelligence database.
+    <p class="section-description">
+        Search documents using natural-language queries. The AI compares
+        the meaning of your query with the stored document content and
+        returns the most semantically relevant documents.
+    </p>
+
+
+    <div class="search-controls">
+
+        <input
+            type="search"
+            id="semanticSearchInput"
+            placeholder="e.g. student academic grades..."
+            autocomplete="off"
+        >
+
+        <button
+            type="button"
+            onclick="performSemanticSearch()"
+        >
+            AI Search
+        </button>
+
+        <button
+            type="button"
+            onclick="clearSemanticSearch()"
+        >
+            Clear
+        </button>
+
+    </div>
+
+
+    <div class="retrieval-summary">
+
+        <strong id="semanticSearchCount">
+            0 results
+        </strong>
+
+        <span>
+            ranked by semantic similarity
+        </span>
+
+    </div>
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Rank</th>
+
+                    <th>Filename</th>
+
+                    <th>Category</th>
+
+                    <th>Semantic Similarity</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="semanticResultsTable">
+
+                <tr>
+
+                    <td colspan="4">
+                        Enter a natural-language query to search documents.
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <div class="explanation-box">
+
+        <strong>How Semantic Search Works</strong>
+
+        <p>
+            The system converts the search query and stored document
+            text into semantic vector representations using the
+            Sentence-Transformers embedding model. It then compares
+            their similarity and ranks the most relevant documents.
         </p>
 
+        <p>
+            <strong>Important:</strong> Semantic similarity is a relevance
+            score, not classification accuracy or probability.
+        </p>
 
-        <div class="search-controls">
+    </div>
 
-            <input
-                type="search"
-                id="searchInput"
-                placeholder="Search by filename or category..."
-                autocomplete="off"
-            >
-
-
-            <select id="categoryFilter">
-
-                <option value="All">
-                    All Categories
-                </option>
-
-                <option value="Transcript">
-                    Transcript
-                </option>
-
-                <option value="Admission">
-                    Admission
-                </option>
-
-                <option value="Financial Record">
-                    Financial Record
-                </option>
-
-                <option value="Administrative Memo">
-                    Administrative Memo
-                </option>
-
-                <option value="Unclassified">
-                    Unclassified
-                </option>
-
-            </select>
+</section>
 
 
-            <button
-                type="button"
-                onclick="clearSearch()"
-            >
-                Clear
-            </button>
+<section>
 
-        </div>
+    <h2>Document Retrieval</h2>
 
-
-        <div class="retrieval-summary">
-
-            <strong id="retrievalCount">
-                0 documents
-            </strong>
-
-            <span>
-                matching current search
-            </span>
-
-        </div>
+    <p class="section-description">
+        Search and filter documents stored in the IPAM
+        document intelligence database.
+    </p>
 
 
-        <div class="table-container">
+    <div class="search-controls">
 
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>ID</th>
-
-                        <th>Filename</th>
-
-                        <th>Category</th>
-
-                        <th>Similarity Score</th>
-
-                        <th>Uploaded At</th>
-
-                    </tr>
-
-                </thead>
+        <input
+            type="search"
+            id="searchInput"
+            placeholder="Search by filename or category..."
+            autocomplete="off"
+        >
 
 
-                <tbody id="documentsTable">
+        <select id="categoryFilter">
 
-                    <tr>
+            <option value="All">
+                All Categories
+            </option>
 
-                        <td colspan="5">
-                            Loading documents...
-                        </td>
+            <option value="Transcript">
+                Transcript
+            </option>
 
-                    </tr>
+            <option value="Admission">
+                Admission
+            </option>
 
-                </tbody>
+            <option value="Financial Record">
+                Financial Record
+            </option>
 
-            </table>
+            <option value="Administrative Memo">
+                Administrative Memo
+            </option>
 
-        </div>
+            <option value="Unclassified">
+                Unclassified
+            </option>
 
-    </section>
-
-</main>
+        </select>
 
 
+        <button
+            type="button"
+            onclick="clearSearch()"
+        >
+            Clear
+        </button>
 
+    </div>
+
+
+    <div class="retrieval-summary">
+
+        <strong id="retrievalCount">
+            0 documents
+        </strong>
+
+        <span>
+            matching current search
+        </span>
+
+    </div>
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Filename</th>
+
+                    <th>Category</th>
+
+                    <th>Similarity Score</th>
+
+                    <th>Uploaded At</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="documentsTable">
+
+                <tr>
+
+                    <td colspan="5">
+                        Loading documents...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
 <script>
 
 /* =============================================================
@@ -376,6 +480,20 @@ const documentsTable =
 
 const retrievalCount =
     document.getElementById("retrievalCount");
+
+const semanticSearchInput =
+    document.getElementById("semanticSearchInput");
+
+const semanticSearchButton =
+    document.querySelector(
+        'button[onclick="performSemanticSearch()"]'
+    );
+
+const semanticResultsTable =
+    document.getElementById("semanticResultsTable");
+
+const semanticSearchCount =
+    document.getElementById("semanticSearchCount");
 
 
 /* =============================================================
@@ -873,7 +991,211 @@ function renderDocuments(documents) {
 
 
 /* =============================================================
-   CLEAR SEARCH
+   SEMANTIC SEARCH
+============================================================= */
+
+async function performSemanticSearch() {
+
+    const query =
+        semanticSearchInput.value.trim();
+
+
+    if (!query) {
+
+        semanticResultsTable.innerHTML = `
+            <tr>
+                <td colspan="4">
+                    Please enter a natural-language search query.
+                </td>
+            </tr>
+        `;
+
+        semanticSearchCount.textContent =
+            "0 results";
+
+        return;
+
+    }
+
+
+    semanticSearchButton.disabled = true;
+
+    semanticSearchButton.textContent =
+        "Searching...";
+
+
+    semanticResultsTable.innerHTML = `
+        <tr>
+            <td colspan="4">
+                Searching documents using semantic similarity...
+            </td>
+        </tr>
+    `;
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/search?q=${encodeURIComponent(query)}&top_k=5`
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Semantic search failed."
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        const results =
+            data.results || [];
+
+
+        semanticSearchCount.textContent =
+            `${results.length} result${results.length === 1 ? "" : "s"}`;
+
+
+        renderSemanticResults(results);
+
+
+    } catch (error) {
+
+        semanticResultsTable.innerHTML = `
+            <tr>
+                <td colspan="4">
+                    Unable to perform semantic search.
+                </td>
+            </tr>
+        `;
+
+        semanticSearchCount.textContent =
+            "0 results";
+
+        console.error(error);
+
+    } finally {
+
+        semanticSearchButton.disabled = false;
+
+        semanticSearchButton.textContent =
+            "AI Search";
+
+    }
+
+}
+
+
+/* =============================================================
+   RENDER SEMANTIC SEARCH RESULTS
+============================================================= */
+
+function renderSemanticResults(results) {
+
+    semanticResultsTable.innerHTML = "";
+
+
+    if (results.length === 0) {
+
+        semanticResultsTable.innerHTML = `
+            <tr>
+                <td colspan="4">
+                    No semantically relevant documents found.
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+
+    results.forEach(function(item, index) {
+
+        const row =
+            document.createElement("tr");
+
+
+        const rankCell =
+            document.createElement("td");
+
+        rankCell.textContent =
+            index + 1;
+
+
+        const filenameCell =
+            document.createElement("td");
+
+        filenameCell.textContent =
+            item.filename || "-";
+
+
+        const categoryCell =
+            document.createElement("td");
+
+        categoryCell.textContent =
+            item.category || "Unclassified";
+
+
+        const similarityCell =
+            document.createElement("td");
+
+        const similarity =
+            Number(item.similarity ?? 0);
+
+
+        similarityCell.textContent =
+            similarity.toFixed(3);
+
+
+        row.appendChild(rankCell);
+
+        row.appendChild(filenameCell);
+
+        row.appendChild(categoryCell);
+
+        row.appendChild(similarityCell);
+
+
+        semanticResultsTable.appendChild(row);
+
+    });
+
+}
+
+
+/* =============================================================
+   CLEAR SEMANTIC SEARCH
+============================================================= */
+
+function clearSemanticSearch() {
+
+    semanticSearchInput.value =
+        "";
+
+    semanticSearchCount.textContent =
+        "0 results";
+
+
+    semanticResultsTable.innerHTML = `
+        <tr>
+            <td colspan="4">
+                Enter a natural-language query to search documents.
+            </td>
+        </tr>
+    `;
+
+}
+
+
+/* =============================================================
+   CLEAR DOCUMENT RETRIEVAL SEARCH
 ============================================================= */
 
 function clearSearch() {
@@ -891,7 +1213,27 @@ function clearSearch() {
 
 
 /* =============================================================
-   SEARCH EVENTS
+   SEMANTIC SEARCH EVENTS
+============================================================= */
+
+semanticSearchInput.addEventListener(
+    "keydown",
+    function(e) {
+
+        if (e.key === "Enter") {
+
+            e.preventDefault();
+
+            performSemanticSearch();
+
+        }
+
+    }
+);
+
+
+/* =============================================================
+   DOCUMENT RETRIEVAL SEARCH EVENTS
 ============================================================= */
 
 searchInput.addEventListener(
