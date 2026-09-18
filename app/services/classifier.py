@@ -153,11 +153,16 @@ def keyword_fallback(text: str):
 
     # No meaningful keyword evidence
     if total == 0:
-
         return "Unclassified", 0.0
 
 
     confidence = scores[best_category] / total
+
+
+    # Require strong enough keyword evidence before assigning a category.
+    # This prevents unrelated documents from being forced into a category.
+    if confidence < 0.60:
+        return "Unclassified", 0.0
 
 
     return best_category, round(confidence, 3)
