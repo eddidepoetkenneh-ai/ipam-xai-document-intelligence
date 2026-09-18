@@ -43,6 +43,37 @@ p {
     line-height: 1.6;
 }
 
+/* Dashboard statistics */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+    margin: 25px 0 30px;
+}
+
+.stat-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.stat-card h3 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.stat-card p {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    color: #12355b;
+}
+
 /* Horizontal lines */
 hr {
     border: 0;
@@ -104,7 +135,7 @@ button:hover {
     line-height: 1.6;
 }
 
-/* Document table wrapper effect */
+/* Document table */
 table {
     width: 100%;
     margin-top: 20px;
@@ -162,7 +193,14 @@ td:nth-child(4) {
     font-weight: 600;
 }
 
-/* Responsive design for smaller screens */
+/* Responsive design */
+@media (max-width: 900px) {
+
+    .stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
 
     main {
@@ -173,6 +211,10 @@ td:nth-child(4) {
 
     h1 {
         font-size: 25px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr 1fr;
     }
 
     #uploadForm {
@@ -189,5 +231,12 @@ td:nth-child(4) {
         display: block;
         overflow-x: auto;
         white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .stats {
+        grid-template-columns: 1fr;
     }
 }

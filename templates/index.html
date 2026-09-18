@@ -1,23 +1,43 @@
 <!doctype html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>IPAM Document Intelligence</title>
+
     <link rel="stylesheet" href="/static/style.css">
 </head>
+
 
 <body>
 
 <main>
 
-    <h1>IPAM Explainable AI Document Intelligence</h1>
+    <!-- =========================================================
+         HEADER
+    ========================================================== -->
 
-    <p>
-        Document Classification, Retrieval and Decision Support Dashboard
-    </p>
+    <header class="dashboard-header">
 
-    <!-- Dashboard Statistics -->
+        <div>
+            <h1>IPAM Explainable AI Document Intelligence</h1>
+
+            <p>
+                Intelligent Document Classification, Retrieval and
+                Decision Support Dashboard
+            </p>
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         DASHBOARD STATISTICS
+    ========================================================== -->
+
     <section class="stats">
 
         <div class="stat-card">
@@ -25,20 +45,24 @@
             <p id="totalDocuments">0</p>
         </div>
 
+
         <div class="stat-card">
             <h3>Transcripts</h3>
             <p id="transcriptCount">0</p>
         </div>
+
 
         <div class="stat-card">
             <h3>Admissions</h3>
             <p id="admissionCount">0</p>
         </div>
 
+
         <div class="stat-card">
             <h3>Financial Records</h3>
             <p id="financialCount">0</p>
         </div>
+
 
         <div class="stat-card">
             <h3>Administrative Memos</h3>
@@ -47,208 +71,712 @@
 
     </section>
 
+
     <hr>
 
-    <!-- Upload Section -->
-    <h2>Upload Document</h2>
 
-    <form id="uploadForm">
+    <!-- =========================================================
+         UPLOAD SECTION
+    ========================================================== -->
 
-        <input
-            id="file"
-            type="file"
-            accept=".pdf,.docx,.png,.jpg,.jpeg,.tiff,.bmp"
-            required
+    <section>
+
+        <h2>Upload Document</h2>
+
+        <p class="section-description">
+            Upload a PDF, DOCX, or scanned image for automated
+            document processing and classification.
+        </p>
+
+
+        <form id="uploadForm">
+
+            <input
+                id="file"
+                type="file"
+                accept=".pdf,.docx,.png,.jpg,.jpeg,.tiff,.bmp"
+                required
+            >
+
+
+            <button type="submit" id="processButton">
+                Process Document
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- =========================================================
+         PROFESSIONAL PROCESSING RESULT
+    ========================================================== -->
+
+    <section id="resultPanel" class="result-panel hidden">
+
+        <div class="result-header">
+
+            <div>
+                <span class="result-label">
+                    AI PROCESSING RESULT
+                </span>
+
+                <h2 id="resultTitle">
+                    Document Processed Successfully
+                </h2>
+            </div>
+
+            <span id="resultStatus" class="status-badge">
+                Processed
+            </span>
+
+        </div>
+
+
+        <div class="result-grid">
+
+            <div class="result-item">
+
+                <span class="result-item-label">
+                    Document
+                </span>
+
+                <strong id="resultFilename">
+                    -
+                </strong>
+
+            </div>
+
+
+            <div class="result-item">
+
+                <span class="result-item-label">
+                    Classification
+                </span>
+
+                <strong id="resultCategory">
+                    -
+                </strong>
+
+            </div>
+
+
+            <div class="result-item">
+
+                <span class="result-item-label">
+                    Similarity Score
+                </span>
+
+                <strong id="resultScore">
+                    -
+                </strong>
+
+            </div>
+
+
+            <div class="result-item">
+
+                <span class="result-item-label">
+                    Database Record
+                </span>
+
+                <strong id="resultDocumentId">
+                    -
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- Explainable AI evidence -->
+
+        <div class="explanation-box">
+
+            <h3>
+                Explainable AI Evidence
+            </h3>
+
+            <p id="explanationMethod">
+                -
+            </p>
+
+
+            <div>
+
+                <span class="result-item-label">
+                    Supporting Terms
+                </span>
+
+                <div id="supportingTerms" class="evidence-list">
+                    <span class="evidence-empty">
+                        No supporting terms identified.
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Extracted text -->
+
+        <details class="text-preview">
+
+            <summary>
+                View extracted text
+            </summary>
+
+            <pre id="textPreview">
+No extracted text available.
+            </pre>
+
+        </details>
+
+    </section>
+
+
+    <!-- =========================================================
+         DOCUMENT RECORDS
+    ========================================================== -->
+
+    <section>
+
+        <h2>Document Records</h2>
+
+        <p class="section-description">
+            Documents processed and stored in the IPAM document
+            intelligence database.
+        </p>
+
+
+        <button
+            type="button"
+            onclick="loadDocuments()"
         >
-
-        <button type="submit">
-            Process Document
+            Refresh Documents
         </button>
 
-    </form>
 
-    <pre id="result"></pre>
+        <div class="table-container">
 
-    <hr>
+            <table>
 
-    <!-- Document Records -->
-    <h2>Document Records</h2>
+                <thead>
 
-    <button onclick="loadDocuments()">
-        Refresh Documents
-    </button>
+                    <tr>
 
-    <table>
+                        <th>ID</th>
 
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Filename</th>
-                <th>Category</th>
-                <th>Confidence</th>
-                <th>Uploaded At</th>
-            </tr>
-        </thead>
+                        <th>Filename</th>
 
-        <tbody id="documentsTable">
+                        <th>Category</th>
 
-            <tr>
-                <td colspan="5">
-                    Loading...
-                </td>
-            </tr>
+                        <th>Similarity Score</th>
 
-        </tbody>
+                        <th>Uploaded At</th>
 
-    </table>
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="documentsTable">
+
+                    <tr>
+
+                        <td colspan="5">
+                            Loading documents...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
 
 </main>
 
 
+
 <script>
+
+/* =============================================================
+   ELEMENT REFERENCES
+============================================================= */
 
 const form = document.getElementById("uploadForm");
 
+const processButton =
+    document.getElementById("processButton");
 
-/* Upload and process document */
-
-form.addEventListener("submit", async function(e) {
-
-    e.preventDefault();
-
-    const fileInput = document.getElementById("file");
-
-    if (!fileInput.files.length) {
-
-        alert("Please select a document.");
-
-        return;
-    }
-
-    const fd = new FormData();
-
-    fd.append("file", fileInput.files[0]);
+const resultPanel =
+    document.getElementById("resultPanel");
 
 
-    const response = await fetch("/api/documents", {
 
-        method: "POST",
+/* =============================================================
+   DISPLAY PROCESSING RESULT
+============================================================= */
 
-        body: fd
+function displayResult(data) {
 
-    });
-
-
-    const data = await response.json();
+    resultPanel.classList.remove("hidden");
 
 
-    document.getElementById("result").textContent =
-        JSON.stringify(data, null, 2);
+    document.getElementById("resultFilename").textContent =
+        data.filename || "-";
 
 
-    /* Refresh dashboard after upload */
-
-    loadDocuments();
-
-});
+    document.getElementById("resultCategory").textContent =
+        data.category || "Unclassified";
 
 
-/* Load documents from PostgreSQL through API */
-
-async function loadDocuments() {
-
-    const response = await fetch("/api/documents");
-
-    const documents = await response.json();
+    document.getElementById("resultScore").textContent =
+        data.classification_score ?? 0;
 
 
-    /* Update statistics */
-
-    document.getElementById("totalDocuments").textContent =
-        documents.length;
+    document.getElementById("resultDocumentId").textContent =
+        data.document_id || "-";
 
 
-    const transcriptCount =
-        documents.filter(item =>
-            item.category === "Transcript"
-        ).length;
+    document.getElementById("textPreview").textContent =
+        data.text_preview || "No extracted text available.";
 
 
-    const admissionCount =
-        documents.filter(item =>
-            item.category === "Admission"
-        ).length;
+    const status =
+        document.getElementById("resultStatus");
 
 
-    const financialCount =
-        documents.filter(item =>
-            item.category === "Financial Record"
-        ).length;
+    const title =
+        document.getElementById("resultTitle");
 
 
-    const memoCount =
-        documents.filter(item =>
-            item.category === "Administrative Memo"
-        ).length;
+    const category =
+        data.category || "Unclassified";
 
 
-    document.getElementById("transcriptCount").textContent =
-        transcriptCount;
+    if (category === "Unclassified") {
 
+        title.textContent =
+            "Document Processed — No Suitable Category Found";
 
-    document.getElementById("admissionCount").textContent =
-        admissionCount;
+        status.textContent =
+            "Unclassified";
 
+        status.className =
+            "status-badge status-warning";
 
-    document.getElementById("financialCount").textContent =
-        financialCount;
+    } else {
 
+        title.textContent =
+            "Document Processed Successfully";
 
-    document.getElementById("memoCount").textContent =
-        memoCount;
+        status.textContent =
+            "Classified";
 
+        status.className =
+            "status-badge status-success";
 
-    /* Update document table */
-
-    const table = document.getElementById("documentsTable");
-
-    table.innerHTML = "";
-
-
-    if (documents.length === 0) {
-
-        table.innerHTML = `
-            <tr>
-                <td colspan="5">
-                    No documents found.
-                </td>
-            </tr>
-        `;
-
-        return;
     }
 
 
-    documents.forEach(item => {
+    /* ---------------------------------------------------------
+       Explanation
+    --------------------------------------------------------- */
 
-        const row = document.createElement("tr");
+    const explanation =
+        data.explanation || {};
 
-        row.innerHTML = `
-            <td>${item.id}</td>
-            <td>${item.filename}</td>
-            <td>${item.category}</td>
-            <td>${item.confidence}</td>
-            <td>${item.uploaded_at}</td>
-        `;
 
-        table.appendChild(row);
+    const method =
+        explanation.method || "Evidence-based analysis";
 
+
+    document.getElementById("explanationMethod").textContent =
+        "Method: " + method;
+
+
+    /* ---------------------------------------------------------
+       Supporting terms
+    --------------------------------------------------------- */
+
+    const termsContainer =
+        document.getElementById("supportingTerms");
+
+
+    termsContainer.innerHTML = "";
+
+
+    const terms =
+        explanation.supporting_terms || [];
+
+
+    if (terms.length === 0) {
+
+        const empty =
+            document.createElement("span");
+
+        empty.className =
+            "evidence-empty";
+
+        empty.textContent =
+            "No supporting terms identified.";
+
+        termsContainer.appendChild(empty);
+
+    } else {
+
+        terms.forEach(function(term) {
+
+            const tag =
+                document.createElement("span");
+
+            tag.className =
+                "evidence-tag";
+
+            tag.textContent =
+                term;
+
+            termsContainer.appendChild(tag);
+
+        });
+
+    }
+
+
+    /* Scroll result into view */
+
+    resultPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
     });
 
 }
 
 
-/* Load dashboard when page opens */
+
+/* =============================================================
+   UPLOAD AND PROCESS DOCUMENT
+============================================================= */
+
+form.addEventListener(
+    "submit",
+    async function(e) {
+
+        e.preventDefault();
+
+
+        const fileInput =
+            document.getElementById("file");
+
+
+        if (!fileInput.files.length) {
+
+            alert("Please select a document.");
+
+            return;
+
+        }
+
+
+        /* Disable button while processing */
+
+        processButton.disabled = true;
+
+        processButton.textContent =
+            "Processing...";
+
+
+        try {
+
+            const fd =
+                new FormData();
+
+
+            fd.append(
+                "file",
+                fileInput.files[0]
+            );
+
+
+            const response =
+                await fetch(
+                    "/api/documents",
+                    {
+                        method: "POST",
+                        body: fd
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Document processing failed."
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            displayResult(data);
+
+
+            /* Refresh dashboard */
+
+            await loadDocuments();
+
+
+        } catch (error) {
+
+            resultPanel.classList.remove("hidden");
+
+
+            document.getElementById("resultTitle").textContent =
+                "Document Processing Failed";
+
+
+            document.getElementById("resultStatus").textContent =
+                "Error";
+
+
+            document.getElementById("resultStatus").className =
+                "status-badge status-error";
+
+
+            document.getElementById("resultFilename").textContent =
+                fileInput.files[0]?.name || "-";
+
+
+            document.getElementById("resultCategory").textContent =
+                "-";
+
+
+            document.getElementById("resultScore").textContent =
+                "-";
+
+
+            document.getElementById("resultDocumentId").textContent =
+                "-";
+
+
+            document.getElementById("explanationMethod").textContent =
+                error.message;
+
+
+            document.getElementById("supportingTerms").innerHTML =
+                '<span class="evidence-empty">Unable to generate evidence.</span>';
+
+        }
+
+
+        finally {
+
+            processButton.disabled = false;
+
+            processButton.textContent =
+                "Process Document";
+
+        }
+
+    }
+);
+
+
+
+/* =============================================================
+   LOAD DOCUMENTS FROM DATABASE
+============================================================= */
+
+async function loadDocuments() {
+
+    try {
+
+        const response =
+            await fetch("/api/documents");
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to retrieve documents."
+            );
+
+        }
+
+
+        const documents =
+            await response.json();
+
+
+        /* -----------------------------------------------------
+           Dashboard statistics
+        ----------------------------------------------------- */
+
+        document.getElementById("totalDocuments").textContent =
+            documents.length;
+
+
+        const transcriptCount =
+            documents.filter(
+                item =>
+                    item.category === "Transcript"
+            ).length;
+
+
+        const admissionCount =
+            documents.filter(
+                item =>
+                    item.category === "Admission"
+            ).length;
+
+
+        const financialCount =
+            documents.filter(
+                item =>
+                    item.category === "Financial Record"
+            ).length;
+
+
+        const memoCount =
+            documents.filter(
+                item =>
+                    item.category === "Administrative Memo"
+            ).length;
+
+
+        document.getElementById("transcriptCount").textContent =
+            transcriptCount;
+
+
+        document.getElementById("admissionCount").textContent =
+            admissionCount;
+
+
+        document.getElementById("financialCount").textContent =
+            financialCount;
+
+
+        document.getElementById("memoCount").textContent =
+            memoCount;
+
+
+        /* -----------------------------------------------------
+           Document table
+        ----------------------------------------------------- */
+
+        const table =
+            document.getElementById("documentsTable");
+
+
+        table.innerHTML = "";
+
+
+        if (documents.length === 0) {
+
+            table.innerHTML = `
+                <tr>
+                    <td colspan="5">
+                        No documents found.
+                    </td>
+                </tr>
+            `;
+
+            return;
+
+        }
+
+
+        documents.forEach(function(item) {
+
+            const row =
+                document.createElement("tr");
+
+
+            const idCell =
+                document.createElement("td");
+
+            idCell.textContent =
+                item.id ?? "-";
+
+
+            const filenameCell =
+                document.createElement("td");
+
+            filenameCell.textContent =
+                item.filename || "-";
+
+
+            const categoryCell =
+                document.createElement("td");
+
+            categoryCell.textContent =
+                item.category || "Unclassified";
+
+
+            const scoreCell =
+                document.createElement("td");
+
+            scoreCell.textContent =
+                item.confidence ?? 0;
+
+
+            const dateCell =
+                document.createElement("td");
+
+            dateCell.textContent =
+                item.uploaded_at || "-";
+
+
+            row.appendChild(idCell);
+
+            row.appendChild(filenameCell);
+
+            row.appendChild(categoryCell);
+
+            row.appendChild(scoreCell);
+
+            row.appendChild(dateCell);
+
+
+            table.appendChild(row);
+
+        });
+
+
+    } catch (error) {
+
+        const table =
+            document.getElementById("documentsTable");
+
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    Unable to load document records.
+                </td>
+            </tr>
+        `;
+
+        console.error(error);
+
+    }
+
+}
+
+
+
+/* =============================================================
+   LOAD DASHBOARD ON PAGE OPEN
+============================================================= */
 
 loadDocuments();
 

@@ -1,11 +1,59 @@
+from sentence_transformers import SentenceTransformer, util
 import re
 
 
-CATEGORIES = {
+# Load the semantic embedding model
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+
+# Descriptions representing the four supported document categories
+CATEGORY_DESCRIPTIONS = {
+
+    "Transcript": (
+        "Academic student transcript containing courses, grades, "
+        "semester results, GPA, credits, academic performance and "
+        "student academic records."
+    ),
+
+    "Admission": (
+        "University admission document containing applicant information, "
+        "application details, admission decisions, acceptance, enrollment "
+        "or offer of admission."
+    ),
+
+    "Administrative Memo": (
+        "Institutional administrative memorandum containing official "
+        "communication, departments, meetings, instructions, notices, "
+        "office information and internal directives."
+    ),
+
+    "Financial Record": (
+        "Institutional financial document containing payments, invoices, "
+        "receipts, fees, tuition, balances, transactions, amounts and "
+        "financial information."
+    )
+}
+
+
+# Create embeddings for the category descriptions
+CATEGORY_EMBEDDINGS = {
+
+    category: model.encode(
+        description,
+        convert_to_tensor=True
+    )
+
+    for category, description
+    in CATEGORY_DESCRIPTIONS.items()
+}
+
+
+# Weighted keyword evidence
+KEYWORDS = {
 
     "Transcript": {
+
         "transcript": 5,
-        "academic transcript": 6,
         "semester": 2,
         "grade": 2,
         "grades": 2,
@@ -22,19 +70,20 @@ CATEGORIES = {
     },
 
     "Admission": {
+
         "admission": 5,
         "admission letter": 6,
         "applicant": 3,
         "application": 3,
         "entry": 2,
         "acceptance": 4,
-        "acceptance letter": 6,
         "enrollment": 3,
         "enrolment": 3,
         "offer letter": 5
     },
 
     "Administrative Memo": {
+
         "memo": 5,
         "memorandum": 6,
         "department": 2,
@@ -42,13 +91,11 @@ CATEGORIES = {
         "office": 2,
         "official": 2,
         "subject": 2,
-        "to:": 2,
-        "from:": 2,
-        "cc:": 2,
-        "date:": 2
+        "date": 2
     },
 
     "Financial Record": {
+
         "invoice": 6,
         "payment": 4,
         "receipt": 5,
@@ -62,74 +109,127 @@ CATEGORIES = {
         "transaction": 4,
         "account number": 4
     }
-
 }
 
 
-def count_term(text: str, term: str) -> int:
+def keyword_fallback(text: str):
+
     """
-    Count occurrences of a term in the document text.
+    Classify the document using weighted keyword evidence.
+
+    This is used when semantic evidence is too weak.
     """
-
-    pattern = r"\b" + re.escape(term) + r"\b"
-
-    return len(re.findall(pattern, text))
-
-
-def classify_document(text: str):
-    """
-    Classify a document using weighted evidence.
-
-    Returns:
-        category, confidence
-    """
-
-    if not text or not text.strip():
-        return "Unclassified", 0.0
 
     low = text.lower()
 
     scores = {}
 
-    for category, keywords in CATEGORIES.items():
+    for category, keywords in KEYWORDS.items():
 
         score = 0
 
         for keyword, weight in keywords.items():
 
-            occurrences = count_term(low, keyword)
+            matches = len(
+                re.findall(
+                    r"\b" + re.escape(keyword) + r"\b",
+                    low
+                )
+            )
 
-            score += occurrences * weight
+            score += matches * weight
 
         scores[category] = score
 
 
-    # Find category with highest score
-
-    best_category = max(scores, key=scores.get)
-
-    best_score = scores[best_category]
-
-    total_score = sum(scores.values())
+    best_category = max(
+        scores,
+        key=scores.get
+    )
 
 
-    # No meaningful evidence
-
-    if best_score == 0 or total_score == 0:
-
-        return "Unclassified", 0.0
+    total = sum(scores.values())
 
 
-    # Require stronger evidence before classification
-
-    if best_score < 4:
+    # No meaningful keyword evidence
+    if total == 0:
 
         return "Unclassified", 0.0
 
 
-    # Calculate relative confidence
+    confidence = scores[best_category] / total
 
-    confidence = best_score / total_score
+
+    return best_category, round(confidence, 3)
+
+
+def classify_document(text: str):
+
+    """
+    Hybrid document classifier.
+
+    1. Attempts semantic classification using sentence embeddings.
+    2. If semantic evidence is weak, uses weighted keyword evidence.
+    3. If neither method finds meaningful evidence, returns Unclassified.
+    """
+
+    if not text or not text.strip():
+
+        return "Unclassified", 0.0
+
+
+    # Limit the amount of text sent to the embedding model
+    document_text = text[:5000]
+
+
+    # Generate document embedding
+    document_embedding = model.encode(
+        document_text,
+        convert_to_tensor=True
+    )
+
+
+    # Calculate semantic similarity against every category
+    similarities = {}
+
+    for category, category_embedding in CATEGORY_EMBEDDINGS.items():
+
+        similarity = util.cos_sim(
+            document_embedding,
+            category_embedding
+        ).item()
+
+        similarities[category] = similarity
+
+
+    # Select the strongest semantic category
+    best_category = max(
+        similarities,
+        key=similarities.get
+    )
+
+
+    best_similarity = similarities[best_category]
+
+
+    # ---------------------------------------------------------
+    # HYBRID FALLBACK
+    #
+    # If semantic evidence is weak, use weighted keyword
+    # evidence. This prevents legitimate IPAM documents from
+    # being incorrectly marked as Unclassified.
+    # ---------------------------------------------------------
+
+    if best_similarity < 0.35:
+
+        return keyword_fallback(text)
+
+
+    # Convert semantic similarity to a bounded score
+    confidence = max(
+        0.0,
+        min(1.0, best_similarity)
+    )
 
 
     return best_category, round(confidence, 3)
