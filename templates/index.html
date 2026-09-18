@@ -3,14 +3,12 @@
 
 <head>
     <meta charset="utf-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>IPAM Document Intelligence</title>
 
     <link rel="stylesheet" href="/static/style.css">
 </head>
-
 
 <body>
 
@@ -23,12 +21,14 @@
     <header class="dashboard-header">
 
         <div>
+
             <h1>IPAM Explainable AI Document Intelligence</h1>
 
             <p>
                 Intelligent Document Classification, Retrieval and
                 Decision Support Dashboard
             </p>
+
         </div>
 
     </header>
@@ -45,24 +45,20 @@
             <p id="totalDocuments">0</p>
         </div>
 
-
         <div class="stat-card">
             <h3>Transcripts</h3>
             <p id="transcriptCount">0</p>
         </div>
-
 
         <div class="stat-card">
             <h3>Admissions</h3>
             <p id="admissionCount">0</p>
         </div>
 
-
         <div class="stat-card">
             <h3>Financial Records</h3>
             <p id="financialCount">0</p>
         </div>
-
 
         <div class="stat-card">
             <h3>Administrative Memos</h3>
@@ -98,7 +94,6 @@
                 required
             >
 
-
             <button type="submit" id="processButton">
                 Process Document
             </button>
@@ -117,6 +112,7 @@
         <div class="result-header">
 
             <div>
+
                 <span class="result-label">
                     AI PROCESSING RESULT
                 </span>
@@ -124,6 +120,7 @@
                 <h2 id="resultTitle">
                     Document Processed Successfully
                 </h2>
+
             </div>
 
             <span id="resultStatus" class="status-badge">
@@ -209,9 +206,11 @@
                 </span>
 
                 <div id="supportingTerms" class="evidence-list">
+
                     <span class="evidence-empty">
                         No supporting terms identified.
                     </span>
+
                 </div>
 
             </div>
@@ -227,9 +226,7 @@
                 View extracted text
             </summary>
 
-            <pre id="textPreview">
-No extracted text available.
-            </pre>
+            <pre id="textPreview">No extracted text available.</pre>
 
         </details>
 
@@ -267,13 +264,9 @@ No extracted text available.
                     <tr>
 
                         <th>ID</th>
-
                         <th>Filename</th>
-
                         <th>Category</th>
-
                         <th>Similarity Score</th>
-
                         <th>Uploaded At</th>
 
                     </tr>
@@ -309,7 +302,8 @@ No extracted text available.
    ELEMENT REFERENCES
 ============================================================= */
 
-const form = document.getElementById("uploadForm");
+const form =
+    document.getElementById("uploadForm");
 
 const processButton =
     document.getElementById("processButton");
@@ -386,19 +380,20 @@ function displayResult(data) {
 
 
     /* ---------------------------------------------------------
-       Explanation
+       Explainable AI Evidence
     --------------------------------------------------------- */
 
     const explanation =
         data.explanation || {};
 
 
-    const method =
-        explanation.method || "Evidence-based analysis";
-
+    /*
+       Present a professional description of the evidence
+       used by the current prototype.
+    */
 
     document.getElementById("explanationMethod").textContent =
-        "Method: " + method;
+        "Method: Evidence-based document classification";
 
 
     /* ---------------------------------------------------------
@@ -484,8 +479,6 @@ form.addEventListener(
         }
 
 
-        /* Disable button while processing */
-
         processButton.disabled = true;
 
         processButton.textContent =
@@ -529,8 +522,6 @@ form.addEventListener(
 
             displayResult(data);
 
-
-            /* Refresh dashboard */
 
             await loadDocuments();
 
@@ -617,9 +608,7 @@ async function loadDocuments() {
             await response.json();
 
 
-        /* -----------------------------------------------------
-           Dashboard statistics
-        ----------------------------------------------------- */
+        /* Dashboard statistics */
 
         document.getElementById("totalDocuments").textContent =
             documents.length;
@@ -669,9 +658,7 @@ async function loadDocuments() {
             memoCount;
 
 
-        /* -----------------------------------------------------
-           Document table
-        ----------------------------------------------------- */
+        /* Document table */
 
         const table =
             document.getElementById("documentsTable");
@@ -765,6 +752,7 @@ async function loadDocuments() {
                 </td>
             </tr>
         `;
+
 
         console.error(error);
 
