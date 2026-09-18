@@ -20,16 +20,12 @@
 
     <header class="dashboard-header">
 
-        <div>
+        <h1>IPAM Explainable AI Document Intelligence</h1>
 
-            <h1>IPAM Explainable AI Document Intelligence</h1>
-
-            <p>
-                Intelligent Document Classification, Retrieval and
-                Decision Support Dashboard
-            </p>
-
-        </div>
+        <p>
+            Intelligent Document Classification, Retrieval and
+            Decision Support Dashboard
+        </p>
 
     </header>
 
@@ -104,7 +100,7 @@
 
 
     <!-- =========================================================
-         PROFESSIONAL PROCESSING RESULT
+         AI PROCESSING RESULT
     ========================================================== -->
 
     <section id="resultPanel" class="result-panel hidden">
@@ -186,7 +182,7 @@
         </div>
 
 
-        <!-- Explainable AI evidence -->
+        <!-- Explainable AI Evidence -->
 
         <div class="explanation-box">
 
@@ -234,25 +230,79 @@
 
 
     <!-- =========================================================
-         DOCUMENT RECORDS
+         DOCUMENT RETRIEVAL
     ========================================================== -->
 
     <section>
 
-        <h2>Document Records</h2>
+        <h2>Document Retrieval</h2>
 
         <p class="section-description">
-            Documents processed and stored in the IPAM document
-            intelligence database.
+            Search and filter documents stored in the IPAM
+            document intelligence database.
         </p>
 
 
-        <button
-            type="button"
-            onclick="loadDocuments()"
-        >
-            Refresh Documents
-        </button>
+        <div class="search-controls">
+
+            <input
+                type="search"
+                id="searchInput"
+                placeholder="Search by filename or category..."
+                autocomplete="off"
+            >
+
+
+            <select id="categoryFilter">
+
+                <option value="All">
+                    All Categories
+                </option>
+
+                <option value="Transcript">
+                    Transcript
+                </option>
+
+                <option value="Admission">
+                    Admission
+                </option>
+
+                <option value="Financial Record">
+                    Financial Record
+                </option>
+
+                <option value="Administrative Memo">
+                    Administrative Memo
+                </option>
+
+                <option value="Unclassified">
+                    Unclassified
+                </option>
+
+            </select>
+
+
+            <button
+                type="button"
+                onclick="clearSearch()"
+            >
+                Clear
+            </button>
+
+        </div>
+
+
+        <div class="retrieval-summary">
+
+            <strong id="retrievalCount">
+                0 documents
+            </strong>
+
+            <span>
+                matching current search
+            </span>
+
+        </div>
 
 
         <div class="table-container">
@@ -264,9 +314,13 @@
                     <tr>
 
                         <th>ID</th>
+
                         <th>Filename</th>
+
                         <th>Category</th>
+
                         <th>Similarity Score</th>
+
                         <th>Uploaded At</th>
 
                     </tr>
@@ -311,6 +365,24 @@ const processButton =
 const resultPanel =
     document.getElementById("resultPanel");
 
+const searchInput =
+    document.getElementById("searchInput");
+
+const categoryFilter =
+    document.getElementById("categoryFilter");
+
+const documentsTable =
+    document.getElementById("documentsTable");
+
+const retrievalCount =
+    document.getElementById("retrievalCount");
+
+
+/* =============================================================
+   DOCUMENT DATA
+============================================================= */
+
+let allDocuments = [];
 
 
 /* =============================================================
@@ -379,32 +451,19 @@ function displayResult(data) {
     }
 
 
-    /* ---------------------------------------------------------
-       Explainable AI Evidence
-    --------------------------------------------------------- */
-
-    const explanation =
-        data.explanation || {};
-
-
-    /*
-       Present a professional description of the evidence
-       used by the current prototype.
-    */
-
     document.getElementById("explanationMethod").textContent =
         "Method: Evidence-based document classification";
 
-
-    /* ---------------------------------------------------------
-       Supporting terms
-    --------------------------------------------------------- */
 
     const termsContainer =
         document.getElementById("supportingTerms");
 
 
     termsContainer.innerHTML = "";
+
+
+    const explanation =
+        data.explanation || {};
 
 
     const terms =
@@ -444,15 +503,12 @@ function displayResult(data) {
     }
 
 
-    /* Scroll result into view */
-
     resultPanel.scrollIntoView({
         behavior: "smooth",
         block: "start"
     });
 
 }
-
 
 
 /* =============================================================
@@ -582,7 +638,6 @@ form.addEventListener(
 );
 
 
-
 /* =============================================================
    LOAD DOCUMENTS FROM DATABASE
 ============================================================= */
@@ -606,6 +661,10 @@ async function loadDocuments() {
 
         const documents =
             await response.json();
+
+
+        allDocuments =
+            documents;
 
 
         /* Dashboard statistics */
@@ -658,94 +717,14 @@ async function loadDocuments() {
             memoCount;
 
 
-        /* Document table */
+        /* Apply current search/filter */
 
-        const table =
-            document.getElementById("documentsTable");
-
-
-        table.innerHTML = "";
-
-
-        if (documents.length === 0) {
-
-            table.innerHTML = `
-                <tr>
-                    <td colspan="5">
-                        No documents found.
-                    </td>
-                </tr>
-            `;
-
-            return;
-
-        }
-
-
-        documents.forEach(function(item) {
-
-            const row =
-                document.createElement("tr");
-
-
-            const idCell =
-                document.createElement("td");
-
-            idCell.textContent =
-                item.id ?? "-";
-
-
-            const filenameCell =
-                document.createElement("td");
-
-            filenameCell.textContent =
-                item.filename || "-";
-
-
-            const categoryCell =
-                document.createElement("td");
-
-            categoryCell.textContent =
-                item.category || "Unclassified";
-
-
-            const scoreCell =
-                document.createElement("td");
-
-            scoreCell.textContent =
-                item.confidence ?? 0;
-
-
-            const dateCell =
-                document.createElement("td");
-
-            dateCell.textContent =
-                item.uploaded_at || "-";
-
-
-            row.appendChild(idCell);
-
-            row.appendChild(filenameCell);
-
-            row.appendChild(categoryCell);
-
-            row.appendChild(scoreCell);
-
-            row.appendChild(dateCell);
-
-
-            table.appendChild(row);
-
-        });
+        filterDocuments();
 
 
     } catch (error) {
 
-        const table =
-            document.getElementById("documentsTable");
-
-
-        table.innerHTML = `
+        documentsTable.innerHTML = `
             <tr>
                 <td colspan="5">
                     Unable to load document records.
@@ -761,9 +740,174 @@ async function loadDocuments() {
 }
 
 
+/* =============================================================
+   FILTER DOCUMENTS
+============================================================= */
+
+function filterDocuments() {
+
+    const searchTerm =
+        searchInput.value.trim().toLowerCase();
+
+
+    const selectedCategory =
+        categoryFilter.value;
+
+
+    const filteredDocuments =
+        allDocuments.filter(function(item) {
+
+            const filename =
+                (item.filename || "").toLowerCase();
+
+
+            const category =
+                (item.category || "Unclassified");
+
+
+            const matchesSearch =
+                filename.includes(searchTerm) ||
+                category.toLowerCase().includes(searchTerm);
+
+
+            const matchesCategory =
+                selectedCategory === "All" ||
+                category === selectedCategory;
+
+
+            return matchesSearch && matchesCategory;
+
+        });
+
+
+    renderDocuments(filteredDocuments);
+
+}
+
 
 /* =============================================================
-   LOAD DASHBOARD ON PAGE OPEN
+   RENDER DOCUMENT TABLE
+============================================================= */
+
+function renderDocuments(documents) {
+
+    documentsTable.innerHTML = "";
+
+
+    retrievalCount.textContent =
+        `${documents.length} document${documents.length === 1 ? "" : "s"}`;
+
+
+    if (documents.length === 0) {
+
+        documentsTable.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    No matching documents found.
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+
+    documents.forEach(function(item) {
+
+        const row =
+            document.createElement("tr");
+
+
+        const idCell =
+            document.createElement("td");
+
+        idCell.textContent =
+            item.id ?? "-";
+
+
+        const filenameCell =
+            document.createElement("td");
+
+        filenameCell.textContent =
+            item.filename || "-";
+
+
+        const categoryCell =
+            document.createElement("td");
+
+        categoryCell.textContent =
+            item.category || "Unclassified";
+
+
+        const scoreCell =
+            document.createElement("td");
+
+        scoreCell.textContent =
+            item.confidence ?? 0;
+
+
+        const dateCell =
+            document.createElement("td");
+
+        dateCell.textContent =
+            item.uploaded_at || "-";
+
+
+        row.appendChild(idCell);
+
+        row.appendChild(filenameCell);
+
+        row.appendChild(categoryCell);
+
+        row.appendChild(scoreCell);
+
+        row.appendChild(dateCell);
+
+
+        documentsTable.appendChild(row);
+
+    });
+
+}
+
+
+/* =============================================================
+   CLEAR SEARCH
+============================================================= */
+
+function clearSearch() {
+
+    searchInput.value =
+        "";
+
+    categoryFilter.value =
+        "All";
+
+
+    filterDocuments();
+
+}
+
+
+/* =============================================================
+   SEARCH EVENTS
+============================================================= */
+
+searchInput.addEventListener(
+    "input",
+    filterDocuments
+);
+
+
+categoryFilter.addEventListener(
+    "change",
+    filterDocuments
+);
+
+
+/* =============================================================
+   INITIAL DASHBOARD LOAD
 ============================================================= */
 
 loadDocuments();
